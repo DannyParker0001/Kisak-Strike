@@ -20,7 +20,7 @@ if( WINDOWS )
         add_definitions(-DUSE_ACTUAL_DX)
     endif()
     include_directories(${SRCDIR}/thirdparty/nvidia/nvapi)
-    target_link_libraries(${OUTBINNAME} PRIVATE ws2_32.lib)
+    target_link_libraries(${OUTBINNAME} ws2_32.lib)
 endif()
 
 include_directories(../)

@@ -15,10 +15,10 @@ set(OUTBINDIR "${SRCDIR}/../game")
 
 include(${CMAKE_MODULE_PATH}/detect_platform.cmake)
 
-if( WIN32 )
-    set(OUTBINNAME "csgo")
+if( WIN32 ) # This doesn't work lol
+    set(OUTBINNAME "csgo.exe")
 elseif( WIN64 )
-    set(OUTBINNAME "csgo_win64")
+    set(OUTBINNAME "csgo_win64.exe")
 elseif( OSX32 )
     set(OUTBINNAME "csgo_osx")
 elseif( OSX64 )
