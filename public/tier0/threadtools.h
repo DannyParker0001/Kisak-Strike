@@ -1,7 +1,7 @@
 //========== Copyright 2005, Valve Corporation, All rights reserved. ========
 //
 // Purpose: A collection of utility classes to simplify thread handling, and
-//			as much as possible contain portability problems. Here avoiding 
+//			as much as possible contain portability problems. Here avoiding
 //			including windows.h.
 //
 //=============================================================================
@@ -21,6 +21,10 @@
 #define WAIT_TIMEOUT 0x00000102
 #define WAIT_FAILED -1
 #define THREAD_PRIORITY_HIGHEST 2
+#endif
+
+#if defined(__clang__)
+#include "immintrin.h"
 #endif
 
 #if !defined( _X360 ) && !defined( _PS3 ) && defined(COMPILER_MSVC)
@@ -99,7 +103,7 @@ enum ThreadPriorityEnum_t
 	TP_PRIORITY_HIGH = 1,	//	THREAD_PRIORITY_ABOVE_NORMAL
 	TP_PRIORITY_LOW = -1,	//	THREAD_PRIORITY_BELOW_NORMAL
 	TP_PRIORITY_HIGHEST = 2,	//	THREAD_PRIORITY_HIGHEST
-	TP_PRIORITY_LOWEST = -2,	//	THREAD_PRIORITY_LOWEST 
+	TP_PRIORITY_LOWEST = -2,	//	THREAD_PRIORITY_LOWEST
 #endif // PLATFORM_PS3
 };
 
@@ -221,7 +225,7 @@ inline bool ThreadInMainThread()
 #endif
 
 // NOTE: ThreadedLoadLibraryFunc_t needs to return the sleep time in milliseconds or TT_INFINITE
-typedef int (*ThreadedLoadLibraryFunc_t)(); 
+typedef int (*ThreadedLoadLibraryFunc_t)();
 PLATFORM_INTERFACE void SetThreadedLoadLibraryFunc( ThreadedLoadLibraryFunc_t func );
 PLATFORM_INTERFACE ThreadedLoadLibraryFunc_t GetThreadedLoadLibraryFunc();
 
@@ -241,10 +245,10 @@ inline void ThreadPause()
 #elif defined( COMPILER_MSVC32 )
 	__asm pause;
 #elif defined( COMPILER_MSVCX360 )
-	YieldProcessor(); 
-	__asm { or r0,r0,r0 } 
-	YieldProcessor(); 
-	__asm { or r1,r1,r1 } 
+	YieldProcessor();
+	__asm { or r0,r0,r0 }
+	YieldProcessor();
+	__asm { or r1,r1,r1 }
 #else
 #error "implement me"
 #endif
@@ -299,7 +303,7 @@ inline int32 ThreadInterlockedIncrement( int32 volatile *p )
 
 inline int32 ThreadInterlockedDecrement( int32 volatile *p )
 {
-	Assert( (size_t)p % 4 == 0 ); 
+	Assert( (size_t)p % 4 == 0 );
 	return __sync_fetch_and_add( p, -1 ) - 1;
 }
 
@@ -319,17 +323,17 @@ inline int32 ThreadInterlockedExchange( int32 volatile *p, int32 value )
 
 inline int32 ThreadInterlockedExchangeAdd( int32 volatile *p, int32 value )
 {
-	Assert( (size_t)p % 4 == 0 ); 
+	Assert( (size_t)p % 4 == 0 );
 	return __sync_fetch_and_add( p, value );
 }
 inline int64 ThreadInterlockedExchangeAdd64( int64 volatile *p, int64 value )
 {
-	Assert( ( (size_t)p ) % 8 == 0 ); 
+	Assert( ( (size_t)p ) % 8 == 0 );
 	return __sync_fetch_and_add( p, value );
 }
 inline int32 ThreadInterlockedCompareExchange( int32 volatile *p, int32 value, int32 comperand )
 {
-	Assert( (size_t)p % 4 == 0 ); 
+	Assert( (size_t)p % 4 == 0 );
 	return __sync_val_compare_and_swap( p, comperand, value );
 }
 
@@ -356,7 +360,7 @@ extern "C"
 #pragma intrinsic( _InterlockedCompareExchange )
 #pragma intrinsic( _InterlockedDecrement )
 #pragma intrinsic( _InterlockedExchange )
-#pragma intrinsic( _InterlockedExchangeAdd ) 
+#pragma intrinsic( _InterlockedExchangeAdd )
 #pragma intrinsic( _InterlockedIncrement )
 
 inline int32 ThreadInterlockedIncrement( int32 volatile *p )										{ Assert( (size_t)p % 4 == 0 ); return _InterlockedIncrement( (volatile long*)p ); }
@@ -436,7 +440,7 @@ inline int64 ThreadInterlockedIncrement64( int64 volatile *p )
 
 inline int64 ThreadInterlockedDecrement64( int64 volatile *p )
 {
-	AssertDbg( (size_t)p % 8 == 0 ); 
+	AssertDbg( (size_t)p % 8 == 0 );
 	return __sync_fetch_and_add( p, -1 ) - 1;
 }
 
@@ -446,7 +450,7 @@ inline int64 ThreadInterlockedDecrement64( int64 volatile *p )
 // 64 bit windows can use intrinsics for these, 32-bit can't
 #pragma intrinsic( _InterlockedCompareExchange64 )
 #pragma intrinsic( _InterlockedExchange64 )
-#pragma intrinsic( _InterlockedExchangeAdd64 ) 
+#pragma intrinsic( _InterlockedExchangeAdd64 )
 inline int64 ThreadInterlockedCompareExchange64( int64 volatile *p, int64 value, int64 comparand ) { AssertDbg( (size_t)p % 8 == 0 ); return _InterlockedCompareExchange64( (volatile int64*)p, value, comparand ); }
 inline int64 ThreadInterlockedExchangeAdd64( int64 volatile *p, int64 value )							{ AssertDbg( (size_t)p % 8 == 0 ); return _InterlockedExchangeAdd64( (volatile int64*)p, value ); }
 #endif
@@ -550,7 +554,7 @@ private:
 #if defined(POSIX)   && !defined( _GAMECONSOLE )
 		pthread_key_t m_index;
 #else
-		uint32 m_index;		
+		uint32 m_index;
 #endif
 	};
 
@@ -698,16 +702,16 @@ DLL_GLOBAL_IMPORT CTHREADLOCALINT g_nThreadID;
 // 64 bit windows can use intrinsics for these, 32-bit can't
 #pragma intrinsic( _InterlockedCompareExchange64 )
 #pragma intrinsic( _InterlockedExchange64 )
-#pragma intrinsic( _InterlockedExchangeAdd64 ) 
+#pragma intrinsic( _InterlockedExchangeAdd64 )
 inline int64 ThreadInterlockedIncrement64(int64 volatile *p)										{ AssertDbg((size_t)p % 8 == 0); return _InterlockedIncrement64((volatile int64*)p); }
 inline int64 ThreadInterlockedDecrement64(int64 volatile *p)										{ AssertDbg((size_t)p % 8 == 0); return _InterlockedDecrement64((volatile int64*)p); }
 #endif
 
 //-----------------------------------------------------------------------------
 //
-// A super-fast thread-safe integer A simple class encapsulating the notion of an 
-// atomic integer used across threads that uses the built in and faster 
-// "interlocked" functionality rather than a full-blown mutex. Useful for simple 
+// A super-fast thread-safe integer A simple class encapsulating the notion of an
+// atomic integer used across threads that uses the built in and faster
+// "interlocked" functionality rather than a full-blown mutex. Useful for simple
 // things like reference counts, etc.
 //
 //-----------------------------------------------------------------------------
@@ -728,14 +732,14 @@ public:
 	bool operator!=( T rhs ) const	{ return ( m_value != rhs ); }
 
 	T operator++()					{
-										if ( sizeof(T) == sizeof(int32) ) 
+										if ( sizeof(T) == sizeof(int32) )
 											return (T)ThreadInterlockedIncrement( (int32 *)&m_value );
 										else
 											return (T)ThreadInterlockedIncrement64( (int64 *)&m_value );
 	}
 	T operator++(int)				{ return operator++() - 1; }
 
-	T operator--()					{	
+	T operator--()					{
 										if ( sizeof(T) == sizeof(int32) )
 											return (T)ThreadInterlockedDecrement( (int32 *)&m_value );
 										else
@@ -744,8 +748,8 @@ public:
 
 	T operator--(int)				{ return operator--() + 1; }
 
-	bool AssignIf( T conditionValue, T newValue )	
-									{ 
+	bool AssignIf( T conditionValue, T newValue )
+									{
 										if ( sizeof(T) == sizeof(int32) )
 											return ThreadInterlockedAssignIf( (int32 *)&m_value, (int32)newValue, (int32)conditionValue );
 										else
@@ -753,16 +757,16 @@ public:
 									}
 
 
-	T operator=( T newValue )		{ 
+	T operator=( T newValue )		{
 										if ( sizeof(T) == sizeof(int32) )
-											ThreadInterlockedExchange((int32 *)&m_value, newValue); 
+											ThreadInterlockedExchange((int32 *)&m_value, newValue);
 										else
-											ThreadInterlockedExchange64((int64 *)&m_value, newValue); 
-										return m_value; 
+											ThreadInterlockedExchange64((int64 *)&m_value, newValue);
+										return m_value;
 									}
 
 	// Atomic add is like += except it returns the previous value as its return value
-	T AtomicAdd( T add )			{ 
+	T AtomicAdd( T add )			{
 										if ( sizeof(T) == sizeof(int32) )
 											return (T)ThreadInterlockedExchangeAdd( (int32 *)&m_value, (int32)add );
 										else
@@ -770,7 +774,7 @@ public:
 									}
 
 
-	void operator+=( T add )		{ 
+	void operator+=( T add )		{
 										if ( sizeof(T) == sizeof(int32) )
 											ThreadInterlockedExchangeAdd( (int32 *)&m_value, (int32)add );
 										else
@@ -778,19 +782,19 @@ public:
 									}
 
 	void operator-=( T subtract )	{ operator+=( -subtract ); }
-	void operator*=( T multiplier )	{ 
-		T original, result; 
-		do 
-		{ 
-			original = m_value; 
-			result = original * multiplier; 
+	void operator*=( T multiplier )	{
+		T original, result;
+		do
+		{
+			original = m_value;
+			result = original * multiplier;
 		} while ( !AssignIf( original, result ) );
 	}
-	void operator/=( T divisor )	{ 
-		T original, result; 
-		do 
-		{ 
-			original = m_value; 
+	void operator/=( T divisor )	{
+		T original, result;
+		do
+		{
+			original = m_value;
 			result = original / divisor;
 		} while ( !AssignIf( original, result ) );
 	}
@@ -860,7 +864,7 @@ class CInterlockedPtr
 public:
 	CInterlockedPtr() : m_value( 0 )
 	{
-#ifdef PLATFORM_64BITS 
+#ifdef PLATFORM_64BITS
 		COMPILE_TIME_ASSERT( sizeof(T *) == sizeof(int64) );
 #define THREADINTERLOCKEDEXCHANGEADD( _dest, _value ) 	ThreadInterlockedExchangeAdd64( (int64 *)(_dest), _value )
 #else  // PLATFORM_64BITS
@@ -959,7 +963,7 @@ private:
 #if defined( _WIN32 )
 	// Efficient solution to breaking the windows.h dependency, invariant is tested.
 #ifdef _WIN64
-	#define TT_SIZEOF_CRITICALSECTION 40	
+	#define TT_SIZEOF_CRITICALSECTION 40
 #else
 #ifndef _X360
 	#define TT_SIZEOF_CRITICALSECTION 24
@@ -987,9 +991,9 @@ private:
 
 //-----------------------------------------------------------------------------
 //
-// An alternative mutex that is useful for cases when thread contention is 
+// An alternative mutex that is useful for cases when thread contention is
 // rare, but a mutex is required. Instances should be declared volatile.
-// Sleep of 0 may not be sufficient to keep high priority threads from starving 
+// Sleep of 0 may not be sufficient to keep high priority threads from starving
 // lesser threads. This class is not a suitable replacement for a critical
 // section if the resource contention is high.
 //
@@ -1037,8 +1041,8 @@ public:
 		return TryLockInline( ThreadGetCurrentId() );
 	}
 
-#ifndef _DEBUG 
-	FORCEINLINE 
+#ifndef _DEBUG
+	FORCEINLINE
 #endif
 	void Lock( unsigned int nSpinSleepTime = 0 ) volatile
 	{
@@ -1062,7 +1066,7 @@ public:
 	}
 
 #ifndef _DEBUG
-	FORCEINLINE 
+	FORCEINLINE
 #endif
 	void Unlock() volatile
 	{
@@ -1352,7 +1356,7 @@ public:
 	// If bWaitAll=true, then it'll return 0 if all the objects were set.
 	//-----------------------------------------------------
 	static uint32 WaitForMultiple( int nObjects, CThreadSyncObject **ppObjects, bool bWaitAll, uint32 dwTimeout = TT_INFINITE );
-	
+
 	// This builds a list of pointers and calls straight through to the other WaitForMultiple.
 	static uint32 WaitForMultiple( int nObjects, CThreadSyncObject *ppObjects, bool bWaitAll, uint32 dwTimeout = TT_INFINITE );
 
@@ -1463,10 +1467,10 @@ enum NamedEventResult_t
 #if defined( _PS3 )
 //---------------------------------------------------------------------------
 // CThreadEventWaitObject - the purpose of this class is to help implement
-// WaitForMultipleObejcts on PS3. 
+// WaitForMultipleObejcts on PS3.
 //
-// Each event maintains a linked list of CThreadEventWaitObjects. When a 
-// thread wants to wait on an event it passes the event a semaphore that 
+// Each event maintains a linked list of CThreadEventWaitObjects. When a
+// thread wants to wait on an event it passes the event a semaphore that
 // ptr to see the index of the event that triggered it
 //
 // The thread-specific mutex is to ensure that setting the index and setting the
@@ -1536,7 +1540,7 @@ protected:
 	// These virtual functions need to be inline in order for the class to be exported from tier0.prx
 	virtual bool AddWaitingThread()
 	{
-		//This checks if the event is already signaled and if not creates a semaphore which will be signaled 
+		//This checks if the event is already signaled and if not creates a semaphore which will be signaled
 		//when the event is finally signaled.
 		bool result;
 
@@ -1551,7 +1555,7 @@ protected:
 			m_numWaitingThread++;
 
 			if ( m_numWaitingThread == 1 )
-			{		
+			{
 				sys_semaphore_attribute_t semAttr;
 				sys_semaphore_attribute_initialize( semAttr );
 				int err = sys_semaphore_create( &m_Semaphore, &semAttr, 0, 256 );
@@ -1571,7 +1575,7 @@ protected:
 		m_numWaitingThread--;
 
 		if ( m_numWaitingThread == 0)
-		{		
+		{
 			int err = sys_semaphore_destroy( m_Semaphore );
 			Assert( err == CELL_OK );
 			m_bInitalized = false;
@@ -1591,10 +1595,10 @@ private:
 	uint32_t				m_numWaitingThread;
 	uint32_t				m_bInitalized;
 
-	CThreadEventWaitObject	m_waitObjects[CTHREADEVENT_MAX_WAITING_THREADS+2];	
+	CThreadEventWaitObject	m_waitObjects[CTHREADEVENT_MAX_WAITING_THREADS+2];
 	CThreadEventWaitObject	*m_pWaitObjectsPool;
 	CThreadEventWaitObject	*m_pWaitObjectsList;
-	
+
 	CThreadEventWaitObject* LLUnlinkNode(CThreadEventWaitObject *node);
 	CThreadEventWaitObject* LLLinkNode(CThreadEventWaitObject* list, CThreadEventWaitObject *node);
 
@@ -1641,7 +1645,7 @@ private:
 #ifdef WIN32
 	CThreadFastMutex m_mutex;
 #else
-	CThreadMutex m_mutex;	
+	CThreadMutex m_mutex;
 #endif
 	CThreadEvent m_CanWrite;
 	CThreadEvent m_CanRead;
@@ -1662,7 +1666,7 @@ class ALIGN8 PLATFORM_CLASS CThreadSpinRWLock
 {
 public:
 	CThreadSpinRWLock()
-	{ 
+	{
 		m_lockInfo.m_i32 = 0;
 		m_writerId = 0;
 #ifdef REENTRANT_THREAD_SPIN_RW_LOCK
@@ -2079,7 +2083,7 @@ public:
 	}
 
 	// check for a message. not 100% reliable - someone could grab the message first
-	bool MessageWaiting( void ) 
+	bool MessageWaiting( void )
 	{
 		return ( Head != NULL );
 	}
@@ -2137,7 +2141,7 @@ public:
 //
 //-----------------------------------------------------------------------------
 
-#ifdef MSVC
+#if defined MSVC || (defined ( __clang__ ) && defined( PLATFORM_WINDOWS ))
 typedef struct _RTL_CRITICAL_SECTION RTL_CRITICAL_SECTION;
 typedef RTL_CRITICAL_SECTION CRITICAL_SECTION;
 
@@ -2331,7 +2335,7 @@ inline void CThreadMutex::SetTrace(bool fTrace)
 {
 }
 
-#else 
+#else
 #error
 #endif // POSIX
 
@@ -2399,7 +2403,7 @@ inline bool CThreadSpinRWLock::IsLockedForRead()
 FORCEINLINE bool CThreadSpinRWLock::TryLockForWrite()
 {
 	volatile LockInfo_t &curValue = m_lockInfo;
-	if ( !( curValue.m_i32 & 0x00010000 ) && ThreadInterlockedAssignIf( &curValue.m_i32, 0x00010000, 0  ) ) 
+	if ( !( curValue.m_i32 & 0x00010000 ) && ThreadInterlockedAssignIf( &curValue.m_i32, 0x00010000, 0  ) )
 	{
 		ThreadMemoryBarrier();
 		RWLAssert( m_iWriteDepth == 0 && m_writerId == 0 );
@@ -2445,7 +2449,7 @@ FORCEINLINE bool CThreadSpinRWLock::TryLockForRead()
 	volatile LockInfo_t &curValue = m_lockInfo;
 	if ( !( curValue.m_i32 & 0x00010000 ) ) // !m_lockInfo.m_fWriting
 	{
-		LockInfo_t oldValue; 
+		LockInfo_t oldValue;
 		LockInfo_t newValue;
 		oldValue.m_i32 = ( curValue.m_i32 & 0xffff );
 		newValue.m_i32 = oldValue.m_i32 + 1;
@@ -2530,7 +2534,7 @@ void CThreadSpinRWLock::UnlockRead()
 /* (commented out to reduce distraction in colorized editor, remove entirely when new implementation settles)
 inline bool CThreadSpinRWLock::AssignIf( const LockInfo_t &newValue, const LockInfo_t &comperand )
 {
-	// Note: using unions guarantees no aliasing bugs. Casting structures through *(int64*)& 
+	// Note: using unions guarantees no aliasing bugs. Casting structures through *(int64*)&
 	//       may create hard-to-catch bugs because when you do that, compiler doesn't know that the newly computed pointer
 	//       is actually aliased with LockInfo_t structure. It's rarely a problem in practice, but when it is, it's a royal pain to debug.
 	return ThreadInterlockedAssignIf64( &m_lockInfo.m_i64, newValue.m_i64, comperand.m_i64 );

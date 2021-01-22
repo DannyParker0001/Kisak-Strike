@@ -1,6 +1,6 @@
 //====== Copyright © 1996-2004, Valve Corporation, All rights reserved. =======
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================
 
@@ -38,7 +38,7 @@ public:
 	// NOTE: nInitialLength indicates how much of the buffer starts full
 	CUtlBinaryBlock( void* pMemory, int nSizeInBytes, int nInitialLength );
 	CUtlBinaryBlock( const void* pMemory, int nSizeInBytes );
-	
+
 	CUtlBinaryBlock( const CUtlBinaryBlock& src );
 	CUtlBinaryBlock &operator=( const CUtlBinaryBlock &src );
 
@@ -145,7 +145,7 @@ inline void CUtlBinaryBlock::Purge()
 
 
 //-----------------------------------------------------------------------------
-// Simple string class. 
+// Simple string class.
 // NOTE: This is *not* optimal! Use in tools, but not runtime code
 //-----------------------------------------------------------------------------
 class CUtlString
@@ -196,7 +196,7 @@ public:
 	}
 
 	// Sets the length (used to serialize into the buffer )
-	// Note: If nLen != 0, then this adds an extra byte for a null-terminator.	
+	// Note: If nLen != 0, then this adds an extra byte for a null-terminator.
 	void		Set( const char *pValue );
 	void		SetLength( int nLen );
 	void		Purge();
@@ -235,7 +235,7 @@ public:
 	CUtlString &operator+=( char c );
 	CUtlString &operator+=( int rhs );
 	CUtlString &operator+=( double rhs );
-	
+
 	CUtlString operator+( const char *pOther )const;
 	CUtlString operator+( int rhs )const;
 
@@ -249,7 +249,7 @@ public:
 	int Format( const char *pFormat, ... );
 	int FormatV( const char *pFormat, va_list marker );
 #endif
-	
+
 	void SetDirect( const char *pValue, int nChars );
 
 	// Defining AltArgumentType_t hints that associative container classes should
@@ -271,7 +271,7 @@ public:
 	CUtlString Replace( char cFrom, char cTo );
 
 	/// Replace one string with the other (single pass).  Passing a NULL to pchTo is same as calling Remove
-	CUtlString Replace( char const *pchFrom, const char *pchTo, bool bCaseSensitive = false ) const; 
+	CUtlString Replace( char const *pchFrom, const char *pchTo, bool bCaseSensitive = false ) const;
 
 		/// helper func for caseless replace
 	CUtlString ReplaceCaseless( char const *pchFrom, const char *pchTo ) const { return Replace( pchFrom, pchTo, false ); }
@@ -284,7 +284,7 @@ public:
 	void		Trim( const char *szTargets = "\t\r\n " );
 
 	// Calls right through to V_MakeAbsolutePath.
-	CUtlString AbsPath( const char *pStartingDir=NULL ) const;	
+	CUtlString AbsPath( const char *pStartingDir=NULL ) const;
 
 	CUtlString AbsPath(const char *pStartingDir, bool bLowercaseName) const
 	{
@@ -298,7 +298,7 @@ public:
 
 	// Gets the filename (everything except the path.. c:\a\b\c\somefile.txt -> somefile.txt).
 	CUtlString UnqualifiedFilename() const;
-	
+
 	// Strips off one directory. Uses V_StripLastDir but strips the last slash also!
 	CUtlString DirName();
 
@@ -618,10 +618,10 @@ public:
 	void SetPtr(char *pchString, size_t nLength);
 	void Swap(CUtlStringBuilder &src);
 
-	// If you want to take ownership of the ptr, you can use this. So for instance if you had 
-	// a CUtlString you wanted to move it to a CUtlStringConst without making a copy, you 
+	// If you want to take ownership of the ptr, you can use this. So for instance if you had
+	// a CUtlString you wanted to move it to a CUtlStringConst without making a copy, you
 	// could do: CUtlStringConst strConst( strUtl.Detach() );
-	// Also used for fast temporaries when a string that does not need to be retained is being 
+	// Also used for fast temporaries when a string that does not need to be retained is being
 	// returned from a func. ie: return (str.Detach());
 	// All strings in this file can take a CUtlStringResult as a constructor parm and will take ownership directly.
 	//CUtlStringResult Detach();
@@ -784,7 +784,7 @@ private:
 		struct _Stack
 		{
 		private:
-			// last byte is doing a hack double duty.  It holds how many bytes 
+			// last byte is doing a hack double duty.  It holds how many bytes
 			// are left in the string; so when the string is 'full' it will be
 			// '0' and thus suffice as the terminating null.  This is why
 			// we hold remaining chars instead of 'string length'
@@ -887,7 +887,9 @@ private:
 			// If this fails when the heap sentinel and where the stack string stores its bytes left
 			// aren't aliases.  This is needed so that regardless of how the 'sentinel' to mark
 			// that the string is on the heap is set, it is set as expected on both sides of the union.
+			#if !defined(__clang__)
 			COMPILE_TIME_ASSERT(offsetof(_Heap, sentinel) == (offsetof(_Stack, m_szString) + MAX_STACK_STRLEN));
+            #endif
 
 			// Lots of code assumes it can look at m_data.Stack.m_nBytesLeft for an empty string; which
 			// means that it will equal MAX_STACK_STRLEN.  Therefor it must be a different value than
@@ -1144,7 +1146,7 @@ inline void CUtlStringBuilder::SetDirect(const char *pchSource, size_t nChars)
 	if (pszString)
 	{
 		memcpy(pszString, pchSource, nChars);
-		// PrepareBuffer already allocated space for the terminating null, 
+		// PrepareBuffer already allocated space for the terminating null,
 		// and inserted it for us. Make sure we didn't clobber it.
 		// Also assign it anyways so we don't risk the caller having a buffer
 		// running into random bytes.

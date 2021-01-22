@@ -13,7 +13,7 @@
 #pragma once
 #endif
 
-#define	FUNC_APPEND_PARAMS_0	
+#define	FUNC_APPEND_PARAMS_0
 #define	FUNC_APPEND_PARAMS_1	pDesc->m_Parameters.SetGrowSize( 1 ); pDesc->m_Parameters.EnsureCapacity( 1 ); pDesc->m_Parameters.AddToTail( ScriptDeduceType( FUNC_ARG_TYPE_1 ) );
 #define	FUNC_APPEND_PARAMS_2	pDesc->m_Parameters.SetGrowSize( 1 ); pDesc->m_Parameters.EnsureCapacity( 2 ); pDesc->m_Parameters.AddToTail( ScriptDeduceType( FUNC_ARG_TYPE_1 ) ); pDesc->m_Parameters.AddToTail( ScriptDeduceType( FUNC_ARG_TYPE_2 ) );
 #define	FUNC_APPEND_PARAMS_3	pDesc->m_Parameters.SetGrowSize( 1 ); pDesc->m_Parameters.EnsureCapacity( 3 ); pDesc->m_Parameters.AddToTail( ScriptDeduceType( FUNC_ARG_TYPE_1 ) ); pDesc->m_Parameters.AddToTail( ScriptDeduceType( FUNC_ARG_TYPE_2 ) ); pDesc->m_Parameters.AddToTail( ScriptDeduceType( FUNC_ARG_TYPE_3 ) );
@@ -69,7 +69,7 @@ FUNC_GENERATE_ALL( DEFINE_CONST_MEMBER_FUNC_TYPE_DEDUCER );
 #define ScriptInitMemberFuncDescriptor( pDesc, class, func )							ScriptInitMemberFuncDescriptorNamed( pDesc, class, func, #func )
 
 //-----------------------------------------------------------------------------
-// 
+//
 //-----------------------------------------------------------------------------
 
 template <typename FUNCPTR_TYPE>
@@ -77,7 +77,7 @@ inline ScriptFunctionBindingStorageType_t ScriptConvertFreeFuncPtrToVoid( FUNCPT
 {
 #if defined(_PS3) || defined(POSIX)
 	COMPILE_TIME_ASSERT( sizeof( FUNCPTR_TYPE ) == sizeof( void* ) * 2 || sizeof( FUNCPTR_TYPE ) == sizeof( void* ) );
-	
+
 	if ( sizeof( FUNCPTR_TYPE ) == 4 )
 	{
 		union FuncPtrConvertMI
@@ -107,7 +107,7 @@ inline ScriptFunctionBindingStorageType_t ScriptConvertFreeFuncPtrToVoid( FUNCPT
 		convert.pFunc = pFunc;
 		if ( !convert.fn8.iToc )
 			return convert.fn8.stype;
-		
+
 		Assert( 0 );
 		DebuggerBreak();
 		return 0;
@@ -194,7 +194,7 @@ inline ScriptFunctionBindingStorageType_t ScriptConvertFuncPtrToVoid( FUNCPTR_TY
 			void *p;
 			int m_delta;
 		};
-	
+
 		union FuncPtrConvertMI
 		{
 			MicrosoftUnknownMFP mfp;
@@ -209,7 +209,7 @@ inline ScriptFunctionBindingStorageType_t ScriptConvertFuncPtrToVoid( FUNCPTR_TY
 		}
 		AssertMsg( 0, "Function pointer must be from primary vtable" );
 	}
-	else if ( ( IsPlatformWindowsPC32() && ( sizeof( FUNCPTR_TYPE ) == sizeof( void * ) + ( sizeof( int ) * 3 ) ) ) || 
+	else if ( ( IsPlatformWindowsPC32() && ( sizeof( FUNCPTR_TYPE ) == sizeof( void * ) + ( sizeof( int ) * 3 ) ) ) ||
 	          ( IsPlatformWindowsPC64() && ( sizeof( FUNCPTR_TYPE ) == sizeof( void * ) + ( sizeof( int ) * 4 ) ) ) )
 	{
 		// unknown_inheritance case
@@ -239,7 +239,7 @@ inline ScriptFunctionBindingStorageType_t ScriptConvertFuncPtrToVoid( FUNCPTR_TY
 	else if ( ( sizeof( FUNCPTR_TYPE ) == sizeof( void * ) + sizeof( int ) ) )
 	{
 		AssertMsg( 0, "Note: This path has not been verified yet. See comments below in #else case." );
-	
+
 		struct GnuMFP
 		{
 			union
@@ -249,7 +249,7 @@ inline ScriptFunctionBindingStorageType_t ScriptConvertFuncPtrToVoid( FUNCPTR_TY
 			};
 			int delta;
 		};
-	
+
 		GnuMFP *p = (GnuMFP*)&pFunc;
 		if ( p->vtable_index_2 & 1 )
 		{
@@ -266,15 +266,15 @@ inline ScriptFunctionBindingStorageType_t ScriptConvertFuncPtrToVoid( FUNCPTR_TY
 #error "Need to implement code to crack non-offset member function pointer case"
 	// For gcc, see: http://www.codeproject.com/KB/cpp/FastDelegate.aspx
 	//
-	// Current versions of the GNU compiler use a strange and tricky 
-	// optimization. It observes that, for virtual inheritance, you have to look 
-	// up the vtable in order to get the voffset required to calculate the this 
-	// pointer. While you're doing that, you might as well store the function 
-	// pointer in the vtable. By doing this, they combine the m_func_address and 
-	// m_vtable_index fields into one, and they distinguish between them by 
-	// ensuring that function pointers always point to even addresses but vtable 
+	// Current versions of the GNU compiler use a strange and tricky
+	// optimization. It observes that, for virtual inheritance, you have to look
+	// up the vtable in order to get the voffset required to calculate the this
+	// pointer. While you're doing that, you might as well store the function
+	// pointer in the vtable. By doing this, they combine the m_func_address and
+	// m_vtable_index fields into one, and they distinguish between them by
+	// ensuring that function pointers always point to even addresses but vtable
 	// indices are always odd:
-	// 
+	//
 	// 	// GNU g++ uses a tricky space optimisation, also adopted by IBM's VisualAge and XLC.
 	// 	struct GnuMFP {
 	// 	   union {
@@ -286,13 +286,13 @@ inline ScriptFunctionBindingStorageType_t ScriptConvertFuncPtrToVoid( FUNCPTR_TY
 	// 	adjustedthis = this + delta
 	// 	if (funcadr & 1) CALL (* ( *delta + (vindex+1)/2) + 4)
 	// 	else CALL funcadr
-	// 
-	// The G++ method is well documented, so it has been adopted by many other 
-	// vendors, including IBM's VisualAge and XLC compilers, recent versions of 
-	// Open64, Pathscale EKO, and Metrowerks' 64-bit compilers. A simpler scheme 
-	// used by earlier versions of GCC is also very common. SGI's now 
-	// discontinued MIPSPro and Pro64 compilers, and Apple's ancient MrCpp 
-	// compiler used this method. (Note that the Pro64 compiler has become the 
+	//
+	// The G++ method is well documented, so it has been adopted by many other
+	// vendors, including IBM's VisualAge and XLC compilers, recent versions of
+	// Open64, Pathscale EKO, and Metrowerks' 64-bit compilers. A simpler scheme
+	// used by earlier versions of GCC is also very common. SGI's now
+	// discontinued MIPSPro and Pro64 compilers, and Apple's ancient MrCpp
+	// compiler used this method. (Note that the Pro64 compiler has become the
 	// open source Open64 compiler).
 
 #endif
@@ -363,7 +363,7 @@ inline FUNCPTR_TYPE ScriptConvertFuncPtrFromVoid( ScriptFunctionBindingStorageTy
 		convert.mfp.m_delta = 0;
 		return convert.pFunc;
 	}
-#elif defined( POSIX )
+#elif defined( POSIX ) || defined(__clang__)
 	AssertMsg( 0, "Note: This path has not been implemented yet." );
 #else
 #error "Need to implement code to crack non-offset member function pointer case"
@@ -374,7 +374,7 @@ inline FUNCPTR_TYPE ScriptConvertFuncPtrFromVoid( ScriptFunctionBindingStorageTy
 }
 
 //-----------------------------------------------------------------------------
-// 
+//
 //-----------------------------------------------------------------------------
 
 #define FUNC_BASE_TEMPLATE_FUNC_PARAMS_PASSTHRU_0
@@ -515,7 +515,7 @@ inline FUNCPTR_TYPE ScriptConvertFuncPtrFromVoid( ScriptFunctionBindingStorageTy
 FUNC_GENERATE_ALL( DEFINE_SCRIPT_BINDINGS );
 
 //-----------------------------------------------------------------------------
-// 
+//
 //-----------------------------------------------------------------------------
 
 #endif // VSCRIPT_TEMPLATES_H

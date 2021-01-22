@@ -3,7 +3,7 @@
 // Purpose:  Utility class to help in socket creation. Works for clients + servers
 //
 //===========================================================================//
-
+#define PLATFORM_HWND_TYPEDEF_FUCKOFF
 #include "tier0/platform.h"
 
 #if defined(_WIN32)
@@ -204,12 +204,12 @@ bool CSocketCreator::ConfigureSocket( int sock )
 #else
 	// disable NAGLE (rcon cmds are small in size)
 	int nodelay = 1;
-	setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char*)&nodelay, sizeof(nodelay)); 
+	setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char*)&nodelay, sizeof(nodelay));
 
 	nodelay = 1;
 	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&nodelay, sizeof(nodelay));
 
-	int opt = 1, ret; 
+	int opt = 1, ret;
 	ret = ioctlsocket( sock, FIONBIO, (unsigned long*)&opt ); // non-blocking
 	if ( ret == -1 )
 	{
@@ -239,7 +239,7 @@ void CSocketCreator::ProcessAccept()
 	{
 		if ( !SocketWouldBlock()
 #ifdef POSIX
-			&& errno != EINTR 
+			&& errno != EINTR
 #endif
 		 )
 		{
@@ -251,7 +251,7 @@ void CSocketCreator::ProcessAccept()
 	if ( !ConfigureSocket( newSocket ) )
 	{
 		closesocket( newSocket );
-		return; 
+		return;
 	}
 
 	netadr_t adr;
@@ -306,12 +306,12 @@ int CSocketCreator::ConnectSocket( const netadr_t &netAdr, bool bSingleSocket )
 	{
 		Warning( "Socket ioctl(FIONBIO) failed (%s)\n", NET_ErrorString( WSAGetLastError() ) );
 		closesocket( hSocket );
-		return -1;																	   
+		return -1;
 	}
 
 	// disable NAGLE (rcon cmds are small in size)
 	int nodelay = 1;
-	setsockopt( hSocket, IPPROTO_TCP, TCP_NODELAY, (char*)&nodelay, sizeof(nodelay) ); 
+	setsockopt( hSocket, IPPROTO_TCP, TCP_NODELAY, (char*)&nodelay, sizeof(nodelay) );
 
 	struct sockaddr_in s;
 	netAdr.ToSockadr( (struct sockaddr *)&s );
@@ -320,7 +320,7 @@ int CSocketCreator::ConnectSocket( const netadr_t &netAdr, bool bSingleSocket )
 	if ( ret == -1 )
 	{
 		if ( !SocketWouldBlock() )
-		{	
+		{
 			Warning( "Socket connection failed (%s)\n", NET_ErrorString( WSAGetLastError() ) );
 			closesocket( hSocket );
 			return -1;

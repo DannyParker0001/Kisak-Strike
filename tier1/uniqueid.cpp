@@ -1,12 +1,12 @@
 //====== Copyright © 1996-2005, Valve Corporation, All rights reserved. =======//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //
 // Unique ID generation
 //=============================================================================//
-
+#define PLATFORM_HWND_TYPEDEF_FUCKOFF
 #include "tier0/platform.h"
 
 #ifdef IS_WINDOWS_PC
@@ -104,7 +104,7 @@ bool IsUniqueIdValid( const UniqueId_t &id )
 
 bool IsUniqueIdEqual( const UniqueId_t &id1, const UniqueId_t &id2 )
 {
-	return memcmp( &id1, &id2, sizeof( UniqueId_t ) ) == 0; 
+	return memcmp( &id1, &id2, sizeof( UniqueId_t ) ) == 0;
 }
 
 void UniqueIdToString( const UniqueId_t &id, char *pBuf, int nMaxLen )

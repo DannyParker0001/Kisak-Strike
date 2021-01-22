@@ -21,7 +21,7 @@
 	ELF lets all statically linked libraries to initialize before
 	main function runs, it is required in order to be able to load
 	any PRXs to initialize some CRT globals and sysmodules data.
-	
+
 	ELF tries to load tier0.prx containing the custom memory
 	management allocator as soon as possible in main function.
 
@@ -48,7 +48,7 @@
 	****** HOW DO WE INJECT TIER0 CUSTOM ALLOCATOR SO EARLY?
 
 		For this we utilize two tricks.
-		
+
 		RUN SOME CODE IN TIER0 BEFORE EVERYTHING ELSE:
 			We use attribute "init_priority(101)" on a global struct
 			in tier0 to run its constructor function before any other
@@ -74,12 +74,12 @@
 	all calls to malloc-related functions.
 
 	--wrap=<symbol>
-		
+
 		Use wrapper functions for <symbol>. If the linker is passed
 		the argument '-wrap=foo', it will resolve references to the
 		symbol foo to __wrap_foo; in addition, a new symbol __real_foo
 		will be created which will resolve to the original foo.
-		
+
 		For example, by defining a function __wrap_fopen() that
 		implements any desired wrapping logic and that invokes the
 		real fopen() call through the __real_foo symbol, we can give
@@ -121,7 +121,7 @@ inline void MallocStartupUsed( size_t size )
 {
 	size = ( size + 0xF )&~0xF;	// round up to a multiple of 16 bytes
 	g_ps3_malloc_startup_index += size;
-	
+
 	if ( g_ps3_malloc_startup_index > sizeof( g_ps3_malloc_startup_buffer ) )
 		abort();
 }
@@ -302,7 +302,7 @@ SteamPS3Memory_t *GetSteamMemoryFunctions()
 	{
 #if defined( STEAM_SHARES_GAME_ALLOCATOR )
 		false,								// false=[Steam and game share the tier0 memory allocator]
-#else 
+#else
 		true,								// true=[Steam manages 6Mb chunk, allocated from the game on startup]
 #endif
 		WRAP_FN_HOOK( malloc ),
@@ -344,6 +344,7 @@ void *operator new[] ( unsigned int nSize, int nBlockUse_UNUSED, const char *pFi
 #undef PROTECTED_THINGS_ENABLE   // allow use of _vsnprintf
 
 #include <stdlib.h>
+#define PLATFORM_HWND_TYPEDEF_FUCKOFF
 #include "platform.h"
 extern "C" void __cdecl WriteMiniDump( void	);
 inline void __cdecl VPurecallHandler()
@@ -428,8 +429,8 @@ inline void *ReallocUnattributed( void *pMem, size_t nSize )
 #define _CRTNOALIAS
 #endif
 
-#define ALLOC_CALL _CRTNOALIAS _CRTRESTRICT 
-#define FREE_CALL _CRTNOALIAS 
+#define ALLOC_CALL _CRTNOALIAS _CRTRESTRICT
+#define FREE_CALL _CRTNOALIAS
 #else
 #define ALLOC_CALL
 #define FREE_CALL
@@ -437,7 +438,7 @@ inline void *ReallocUnattributed( void *pMem, size_t nSize )
 
 extern "C"
 {
-	
+
 ALLOC_CALL void *malloc( size_t nSize )
 {
 	return AllocUnattributed( nSize );
@@ -506,8 +507,10 @@ void *_realloc_base( void *pMem, size_t nSize )
 	return ReallocUnattributed( pMem, nSize );
 }
 
-void *_recalloc_base( void *pMem, size_t nSize )
+// This could break everything
+void *_recalloc_base( void *pMem, size_t _Count, size_t _Size )
 {
+    size_t nSize = _Count * _Size;
 	void *pMemOut = ReallocUnattributed( pMem, nSize );
 	if (!pMem)
 	{
@@ -553,7 +556,7 @@ void * __cdecl _realloc_crt(void *ptr, size_t size)
 
 void * __cdecl _recalloc_crt(void *ptr, size_t count, size_t size)
 {
-	return _recalloc_base( ptr, size * count );
+	return _recalloc_base( ptr, count, size );
 }
 
 ALLOC_CALL void * __cdecl _recalloc ( void * memblock, size_t count, size_t size )
@@ -658,7 +661,7 @@ int __cdecl _heapwalk( _HEAPINFO * )
 
 extern "C"
 {
-	
+
 void *malloc_db( size_t nSize, const char *pFileName, int nLine )
 {
 	return MemAlloc_Alloc(nSize, pFileName, nLine);
@@ -673,7 +676,7 @@ void *realloc_db( void *pMem, size_t nSize, const char *pFileName, int nLine )
 {
 	return g_pMemAlloc->Realloc(pMem, nSize, pFileName, nLine);
 }
-	
+
 } // end extern "C"
 
 //-----------------------------------------------------------------------------
@@ -789,7 +792,7 @@ public:
 			g_pMemAlloc->PushAllocDbgInfo(CRT_INTERNAL_FILE_NAME, 0);
 		}
 	}
-	
+
 	~CAttibCRT()
 	{
 		if (m_nBlockUse == _CRT_BLOCK)
@@ -797,7 +800,7 @@ public:
 			g_pMemAlloc->PopAllocDbgInfo();
 		}
 	}
-	
+
 private:
 	int m_nBlockUse;
 };
@@ -811,7 +814,7 @@ private:
 
 extern "C"
 {
-	
+
 void *__cdecl _nh_malloc_dbg( size_t nSize, int nFlag, int nBlockUse,
 								const char *pFileName, int nLine )
 {
@@ -827,7 +830,7 @@ void *__cdecl _malloc_dbg( size_t nSize, int nBlockUse,
 }
 
 #if ( defined(_MSC_VER) && ( _MSC_VER >= 1600 ) ) || defined( _X360 )
-void *__cdecl _calloc_dbg_impl( size_t nNum, size_t nSize, int nBlockUse, 
+void *__cdecl _calloc_dbg_impl( size_t nNum, size_t nSize, int nBlockUse,
 								const char * szFileName, int nLine, int * errno_tmp )
 {
 	return _calloc_dbg( nNum, nSize, nBlockUse, szFileName, nLine );
@@ -975,7 +978,7 @@ ALLOC_CALL void * __cdecl _aligned_offset_recalloc( void * memblock, size_t coun
 
 extern "C"
 {
-	
+
 int _CrtDumpMemoryLeaks(void)
 {
 	return 0;
@@ -1026,7 +1029,7 @@ long __cdecl _CrtSetBreakAlloc( long lNewBreakAlloc )
 {
 	return g_pMemAlloc->CrtSetBreakAlloc( lNewBreakAlloc );
 }
-					 
+
 int __cdecl _CrtIsValidHeapPointer( const void *pMem )
 {
 	return g_pMemAlloc->CrtIsValidHeapPointer( pMem );
@@ -1058,7 +1061,7 @@ int __cdecl _CrtMemDifference( _CrtMemState *pState, const _CrtMemState * oldSta
 
 void __cdecl _CrtMemDumpStatistics( const _CrtMemState *pState )
 {
-	DebuggerBreak();	
+	DebuggerBreak();
 }
 
 void __cdecl _CrtMemCheckpoint( _CrtMemState *pState )
@@ -1079,7 +1082,7 @@ void __cdecl _CrtDoForAllClientObjects( void (*pfn)(void *, void *), void * pCon
 
 
 //-----------------------------------------------------------------------------
-// Methods in dbgrpt.cpp 
+// Methods in dbgrpt.cpp
 //-----------------------------------------------------------------------------
 long _crtAssertBusy = -1;
 
@@ -1113,7 +1116,7 @@ int __cdecl _CrtDbgReport( int nRptType, const char * szFile,
 #if _MSC_VER >= 1400
 
 #if defined( _DEBUG ) && _MSC_VER < 1900
- 
+
 // wrapper which passes no debug info; not available in debug
 void __cdecl _invalid_parameter_noinfo(void)
 {
@@ -1131,14 +1134,14 @@ int __cdecl __crtMessageWindowW( int nRptType, const wchar_t * szFile, const wch
 	return 0;
 }
 
-int __cdecl _CrtDbgReportV( int nRptType, const wchar_t *szFile, int nLine, 
+int __cdecl _CrtDbgReportV( int nRptType, const wchar_t *szFile, int nLine,
 						    const wchar_t *szModule, const wchar_t *szFormat, va_list arglist )
 {
 	Assert(0);
 	return 0;
 }
 
-int __cdecl _CrtDbgReportW( int nRptType, const wchar_t *szFile, int nLine, 
+int __cdecl _CrtDbgReportW( int nRptType, const wchar_t *szFile, int nLine,
 						    const wchar_t *szModule, const wchar_t *szFormat, ...)
 {
 	Assert(0);
@@ -1153,7 +1156,7 @@ int __cdecl _VCrtDbgReportA(int nRptType, void *pReturnAddr, const char* szFile,
 	return 0;
 }
 #else
-int __cdecl _VCrtDbgReportA( int nRptType, const wchar_t * szFile, int nLine, 
+int __cdecl _VCrtDbgReportA( int nRptType, const wchar_t * szFile, int nLine,
 							 const wchar_t * szModule, const wchar_t * szFormat, va_list arglist )
 {
 	Assert(0);
@@ -1166,7 +1169,7 @@ int __cdecl _CrtSetReportHook2( int mode, _CRT_REPORT_HOOK pfnNewHook )
 	_CrtSetReportHook( pfnNewHook );
 	return 0;
 }
- 
+
 
 #endif  /* defined( _DEBUG ) || defined( USE_MEM_DEBUG ) */
 
@@ -1225,8 +1228,8 @@ int __cdecl _CrtReportBlockType(const void * pUserData)
 // to help identify debug binaries.
 #ifdef _WIN32
 	#ifndef NDEBUG // _DEBUG
-		#pragma data_seg("ValveDBG") 
-		volatile const char* DBG = "*** DEBUG STUB ***";                     
+		#pragma data_seg("ValveDBG")
+		volatile const char* DBG = "*** DEBUG STUB ***";
 	#endif
 #endif
 
@@ -1239,7 +1242,7 @@ extern "C"
 {
 size_t __crtDebugFillThreshold = 0;
 
-extern "C" void * __cdecl _heap_alloc_base (size_t size) 
+extern "C" void * __cdecl _heap_alloc_base (size_t size)
 {
     Assert(0);
 	return NULL;
@@ -1281,7 +1284,7 @@ void __cdecl _free_dbg_nolock( void * pUserData, int nBlockUse)
 
 _CRT_ALLOC_HOOK __cdecl _CrtGetAllocHook ( void)
 {
-		Assert(0); 
+		Assert(0);
         return NULL;
 }
 
@@ -1294,7 +1297,7 @@ static int __cdecl CheckBytes( unsigned char * pb, unsigned char bCheck, size_t 
 
 _CRT_DUMP_CLIENT __cdecl _CrtGetDumpClient ( void)
 {
-		Assert(0); 
+		Assert(0);
         return NULL;
 }
 
@@ -1324,7 +1327,7 @@ void * __cdecl _aligned_offset_malloc_dbg( size_t size, size_t align, size_t off
     return _aligned_offset_malloc(size, align, offset);
 }
 
-void * __cdecl _aligned_offset_realloc_dbg( void * memblock, size_t size, size_t align, 
+void * __cdecl _aligned_offset_realloc_dbg( void * memblock, size_t size, size_t align,
                  size_t offset, const char * f_name, int line_n)
 {
     return _aligned_offset_realloc(memblock, size, align, offset);
@@ -1873,7 +1876,7 @@ class _LocaleUpdate
 
 #pragma warning(push)
 #pragma warning(disable: 4483)
-#if _MSC_FULL_VER >= 140050415
+#if _MSC_FULL_VER >= 140050415 && !defined(__clang__)
 #define _NATIVE_STARTUP_NAMESPACE  __identifier("<CrtImplementationDetails>")
 #else  /* _MSC_FULL_VER >= 140050415 */
 #define _NATIVE_STARTUP_NAMESPACE __CrtImplementationDetails

@@ -1,11 +1,11 @@
 //====== Copyright c 1996-2007, Valve Corporation, All rights reserved. =======//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //
 //=============================================================================//
-
+#define PLATFORM_HWND_TYPEDEF_FUCKOFF
 #include "p4helpers.h"
 #include "tier2/tier2.h"
 #include "p4lib/ip4.h"

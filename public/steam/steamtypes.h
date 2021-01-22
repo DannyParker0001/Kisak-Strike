@@ -36,7 +36,8 @@ typedef unsigned char uint8;
 typedef unsigned char uint8;
 typedef signed char int8;
 
-#if defined( _WIN32 )
+// 10000 IQ, just delete the code that errors
+#if defined( _WIN32 ) && false
 
 typedef __int16 int16;
 typedef unsigned __int16 uint16;
@@ -127,7 +128,7 @@ const GID_t k_TxnIDUnknown = 0;
 
 const JobID_t k_JobIDNil = 0xffffffffffffffffull;
 
-// this is baked into client messages and interfaces as an int, 
+// this is baked into client messages and interfaces as an int,
 // make sure we never break this.
 typedef uint32 PackageId_t;
 const PackageId_t k_uPackageIdFreeSub = 0x0;
@@ -136,7 +137,7 @@ const PackageId_t k_uPackageIdInvalid = 0xFFFFFFFF;
 typedef uint32 BundleId_t;
 const BundleId_t k_uBundleIdInvalid = 0;
 
-// this is baked into client messages and interfaces as an int, 
+// this is baked into client messages and interfaces as an int,
 // make sure we never break this.
 typedef uint32 AppId_t;
 const AppId_t k_uAppIdInvalid = 0x0;
@@ -148,7 +149,7 @@ typedef uint32 PhysicalItemId_t;
 const PhysicalItemId_t k_uPhysicalItemIdInvalid = 0x0;
 
 
-// this is baked into client messages and interfaces as an int, 
+// this is baked into client messages and interfaces as an int,
 // make sure we never break this.  AppIds and DepotIDs also presently
 // share the same namespace, but since we'd like to change that in the future
 // I've defined it seperately here.
@@ -173,7 +174,7 @@ typedef uint32 PartnerId_t;
 const PartnerId_t k_uPartnerIdInvalid = 0;
 
 // ID for a depot content manifest
-typedef uint64 ManifestId_t; 
+typedef uint64 ManifestId_t;
 const ManifestId_t k_uManifestIdInvalid = 0;
 
 

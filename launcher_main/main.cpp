@@ -56,7 +56,7 @@
 #endif
 
 #ifdef WIN32
-typedef int (*LauncherMain_t)( HINSTANCE hInstance, HINSTANCE hPrevInstance, 
+typedef int (*LauncherMain_t)( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 							  LPSTR lpCmdLine, int nCmdShow );
 #elif POSIX
 typedef int (*LauncherMain_t)( int argc, char **argv );
@@ -105,7 +105,7 @@ static char *GetBaseDir( const char *pszBuffer )
 	j = strlen( basedir );
 	if (j > 0)
 	{
-		if ( ( basedir[ j-1 ] == '\\' ) || 
+		if ( ( basedir[ j-1 ] == '\\' ) ||
 			 ( basedir[ j-1 ] == '/' ) )
 		{
 			basedir[ j-1 ] = 0;
@@ -132,7 +132,7 @@ int APIENTRY WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 	// Get the root directory the .exe is in
 	char* pRootDir = GetBaseDir( moduleName );
 
-	const char* pBinPath = 
+	const char* pBinPath =
 #ifdef _WIN64
 		"\\x64"
 #else
@@ -141,7 +141,7 @@ int APIENTRY WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 	;
 
 #ifdef _DEBUG
-	int len = 
+	int len =
 #endif
 	_snprintf( szBuffer, sizeof( szBuffer ), "PATH=%s\\bin%s\\;%s", pRootDir, pBinPath, pPath );
 	szBuffer[sizeof( szBuffer ) - 1] = '\0';
@@ -192,9 +192,9 @@ int APIENTRY WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 #include "../common/ps3/ps3_helpers.h"
 
 #ifdef APPCHANGELISTVERSION
-// write the changelist number into the executable so that the GUID changes between builds. 
+// write the changelist number into the executable so that the GUID changes between builds.
 // previously, setting the version number via the SYS_MODULE_INFO was good enough to do
-// this, but not after sdk 350. 
+// this, but not after sdk 350.
 volatile unsigned int clnumber = APPCHANGELISTVERSION;
 __attribute__ ((noinline)) void DummyFuncForUpdatingGUIDs( char *pOut )
 {
@@ -228,7 +228,7 @@ __thread TLSGlobals gTLSGlobals =
 	/*WaitObjectsSemaphore*/		0,
 	/*pCurThread*/					NULL,
 	/*nThreadID*/					0,
-	
+
 	// Engine TLS data (zip/console/splitslot)
 	/*uiEngineZipLastErrorZ*/		0,
 	/*bEngineConsoleIsInSpew*/		false,
@@ -246,7 +246,7 @@ __thread TLSGlobals gTLSGlobals =
 
 	// Physics virtual mesh frame locks
 	/*pPhysicsVirtualMeshFrameLocks*/ NULL,
-	
+
 	/*bNormalQuitRequested*/ false
 };
 TLSGlobals *GetTLSGlobals_ELF() { return &gTLSGlobals; }
@@ -265,7 +265,7 @@ struct PS3_Launch_t
 		m_szPrxName( szPrxName ), m_pPrxParams( pParams )
 	{
 		m_iResult = PS3_PrxLoad( m_szPrxName, m_pPrxParams );
-		if ( m_iResult < CELL_OK ) 
+		if ( m_iResult < CELL_OK )
 		{
 			printf( "ERROR: %s PRX load failed: 0x%08x\n", m_szPrxName, m_iResult );
 		}
@@ -280,7 +280,7 @@ struct PS3_Launch_t
 	int m_iResult;
 };
 
-static const char *LauncherMainSPRXPath( const char *modulename, char *buf, int buflen = CELL_GAME_PATH_MAX ) // formats a path to the module. returns a pointer to the buf param for convenience. 
+static const char *LauncherMainSPRXPath( const char *modulename, char *buf, int buflen = CELL_GAME_PATH_MAX ) // formats a path to the module. returns a pointer to the buf param for convenience.
 {
 	snprintf( buf, buflen, "%s/%s" DLL_EXT_STRING, g_Ps3GameDataPathInfo.PrxPath(), modulename  );
 	return buf;
@@ -302,7 +302,7 @@ void TunerMarkerPop()
 }
 
 // this is debug-only counter; never use it for anything other than debugging!
-uint64_t g_nDebugSwapBufferCount = 0; 
+uint64_t g_nDebugSwapBufferCount = 0;
 void TunerSwapBufferMarker()
 {
 	// this dummy function is only required as a patch-through for Tuner that attaches to the game after the game has been started, as a convenience funciton/
@@ -336,7 +336,7 @@ void TestThreads( int nLevel = 0)
 			return;
 		}
 	}
-	
+
 	for( int i = 0;i < numThreads; ++i )
 	{
 		uint64_t res;
@@ -360,10 +360,10 @@ int MainImpl( int argc, char *argv[] )
 	}
 #endif
 
-	// this is the very first timing message, before tier0 is even initialized and we can use any 
+	// this is the very first timing message, before tier0 is even initialized and we can use any
 	// logging or timing facilities; this is the baseline to measure loading times
 	cell::fios::abstime_t fiosLaunchTime = cell::fios::FIOSGetCurrentTime();
-	
+
 #ifndef _CERT
 	{
 		double flTime = cell::fios::FIOSAbstimeToMicroseconds( fiosLaunchTime ) * 1e-6;
@@ -375,7 +375,7 @@ int MainImpl( int argc, char *argv[] )
 			if( i > 0 )
 				buffer[nMessageSize++] = ',';
 			nMessageSize += snprintf( buffer + nMessageSize, sizeof(buffer) - nMessageSize, " \"%s\"", argv[i] );
-		}																				    
+		}
 		nMessageSize += snprintf(buffer + nMessageSize, sizeof(buffer) - nMessageSize, " )\n" );
 		unsigned wrote;
 		sys_tty_write( SYS_TTYP6, buffer, nMessageSize, &wrote );
@@ -389,8 +389,8 @@ int MainImpl( int argc, char *argv[] )
 	// to compile in the function call here. This is the only way to guarantee
 	// that different builds will have different GUIDs, because we don't often
 	// change launcher_main between versions, and the PRXes don't get individual
-	// GUIDs in the dump. 
-	// Don't pass in more than one million commandline 
+	// GUIDs in the dump.
+	// Don't pass in more than one million commandline
 	// parameters or this will corrupt the one millionth.
 	if ( argc > 100000000 )
 	{
@@ -513,7 +513,7 @@ int MainImpl( int argc, char *argv[] )
 	tier0.pfnSwapBufferMarker = TunerSwapBufferMarker;
 	tier0.ppPrxModulesList = PS3_PrxGetModulesList();
 	tier0.m_pGcmSharedData = &g_gcmSharedData;
-	
+
 
 #ifndef _CERT
 
@@ -540,14 +540,14 @@ int MainImpl( int argc, char *argv[] )
 		// cannot allocate IO memory
 		return -2;
 	}
-	
+
 	int32 result = cellGcmInit( m_nCmdSize, m_nIoSize, m_pIoAddress );
 	if ( result < CELL_OK )
 		return result;
 
 	g_gcmSharedData.m_pIoMemory = ( void* )pIoAddress;
 */
-	
+
 	PS3_Launch_t tier0Launch( LauncherMainSPRXPath( "tier0", path ), &tier0 );
 	if( tier0Launch.m_iResult < CELL_OK )
 	{
@@ -559,7 +559,7 @@ int MainImpl( int argc, char *argv[] )
 	PS3_Launch_t vstdlibLaunch( LauncherMainSPRXPath( "vstdlib", path ), &vstdlib );
 	if( vstdlibLaunch.m_iResult >= CELL_OK )
 	{
-		
+
 	#ifndef NO_STEAM
 		PS3MainParameters< PS3_PrxLoadParametersBase_t > steamapi;
 		PS3_Launch_t steamapiLaunch( LauncherMainSPRXPath( "steam_api", path ), &steamapi );
@@ -582,7 +582,7 @@ int MainImpl( int argc, char *argv[] )
 				printf( "ERROR: failed to obtain LauncherMain entry point!\n" );
 			}
 			PS3_PrxUnload( launcher.sysPrxId );
-		
+
 	#ifndef NO_STEAM
 			PS3_PrxUnload( steamapi.sysPrxId );
 		}
@@ -601,9 +601,9 @@ int MainImpl( int argc, char *argv[] )
 		unsigned int dummy;
 		char const *szWarnMsg = "EXITING WITH PRX MODULE: ";
 		sys_tty_write( SYS_TTYP6, szWarnMsg, strlen( szWarnMsg ), &dummy );
-		
+
 		sys_tty_write( SYS_TTYP6, pEntry->chName, strlen( pEntry->chName ), &dummy );
-		
+
 		szWarnMsg = "\n";
 		sys_tty_write( SYS_TTYP6, szWarnMsg, strlen( szWarnMsg ), &dummy );
 	}
@@ -670,7 +670,7 @@ int main( int argc, char *argv[] )
 #endif
 
 	void *launcher = dlopen( pLauncherPath, RTLD_NOW );
-	
+
 	if ( !launcher )
 	{
 	    //lwss - add dll path in error
@@ -679,7 +679,7 @@ int main( int argc, char *argv[] )
 		while(1);
 		return 0;
 	}
-	
+
 	LauncherMain_t main = (LauncherMain_t)dlsym( launcher, "LauncherMain" );
 	if ( !main )
 	{
@@ -713,7 +713,7 @@ bool ParseCommandLineArg( const char *pCmdLine, const char* pKey, char* pValueBu
 		{
 			return false;
 		}
-		
+
 		// found, but could be a substring
 		if ( pArg[keyLen] == '\0' || pArg[keyLen] == ' ' )
 		{
@@ -744,7 +744,7 @@ bool ParseCommandLineArg( const char *pCmdLine, const char* pKey, char* pValueBu
 		}
 		pValueBuff[i] = '\0';
 	}
-	
+
 	return true;
 }
 
@@ -895,7 +895,7 @@ LauncherMain_t GetLaunchEntryPoint( char *pNewCommandLine )
 	};
 
 	// Corresponds to pImplicitDLLs. A dll load failure is only an error if that dll is tagged as required.
-	const bool bDllRequired[] = 
+	const bool bDllRequired[] =
 	{
 		true,	// tier0
 		true,	// vstdlib
@@ -980,7 +980,7 @@ VOID __cdecl main()
 	LauncherMain_t newMain = GetLaunchEntryPoint( newCmdLine );
 	if ( newMain )
 	{
-		// 360 has no concept of instances, spoof one 
+		// 360 has no concept of instances, spoof one
 		newMain( (HINSTANCE)1, (HINSTANCE)0, (LPSTR)newCmdLine, 0 );
 	}
 }

@@ -50,7 +50,13 @@ target_sources(${OUTBINNAME} PRIVATE "launcher.cpp")
 target_sources(${OUTBINNAME} PRIVATE "reslistgenerator.cpp")
 
 target_link_libraries(${OUTBINNAME} appframework_client tier1_client tier2_client tier3_client interfaces_client )
+if(WINDOWS)
+#message(FATAL_ERROR "Your mom is obese! ${LIBPUBLIC}")
+target_link_libraries(${OUTBINNAME} ${LIBPUBLIC}/steam_api.lib) # Link to proprietary steamapi
+#target_link_libraries(${OUTBINNAME} ${LIBPUBLIC}/win64/steam_api.dll) # Link to proprietary steamapi
+else()
 target_link_libraries(${OUTBINNAME} ${LIBPUBLIC}/libsteam_api.so) # Link to proprietary steamapi
+endif()
 if( NOT IS_LIB_PROJECT AND GL )
     target_link_libraries(${OUTBINNAME} libtogl_client) # Link to precompiled togl
 endif()
